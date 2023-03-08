@@ -1,0 +1,58 @@
+# Created on Thu Feb 07 16:34:38 2019
+# @author: Rami Ezzouch, modified by Ago
+
+instruments:
+
+    uhf:
+        driver: qcodes.instrument_drivers.ZI.ZIUHFLI
+        type: ZIUHFLI
+        init:
+            device_ID: 'dev2010'
+        enable_forced_reconnect: True
+    magnet:
+        driver: qcodes.instrument_drivers.oxford.mercuryiPS
+        type: MercuryiPS
+        init:
+            address: '192.168.150.3'
+            axes: ['Z']
+        enable_forced_reconnect: True
+    dmm:
+        driver: qcodes.instrument_drivers.Keysight.Keysight_34465A
+        type: Keysight_34465A
+        init:
+#           address: 'TCPIP0::K-34461A-12520.local::inst0::INSTR'
+            address: 'TCPIP0::K-34461A-12520::inst0::INSTR'
+        enable_forced_reconnect: True
+    dac:
+        driver: iTest
+        type: ITest
+        init:
+            address: 'TCPIP0::192.168.150.115::5025::SOCKET'
+        enable_forced_reconnect: True
+    mwgen:
+        driver: MG3693C
+        type: MG3693C
+        init:
+            address: 'GPIB0::6::INSTR'
+        enable_forced_reconnect: True
+     
+    rfGenerator:
+        driver: qcodes.instrument_drivers.agilent.E8527D
+        type: Agilent_E8527D
+        init:
+            address: 'TCPIP0::192.168.150.71::inst0::INSTR'
+            step_attenuator: True
+        enable_forced_reconnect: True
+#   powerMeter:
+#        driver: qcodes.instrument_drivers.rohde_schwarz.NRP
+#        type: RohdeSchwarz_NRP
+#        init:
+#            address: 'USB0::0x0AAD::0x001B::102496::INSTR'
+#        enable_forced_reconnect: True
+
+#    awg:
+#        driver: qcodes.instrument_drivers.tektronix.AWG5014
+#        type: Tektronix_AWG5014
+#        init:
+#            address: 'TCPIP0::193.168.1.5::inst0::INSTR'
+#        enable_forced_reconnect: True

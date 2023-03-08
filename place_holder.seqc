@@ -1,0 +1,115 @@
+const amplitude_real=+0.1;        // (V)
+
+const amplitude = amplitude_real/0.15;  //
+
+const f_s =1.8e9/128;                  // AWG sampling rate1
+
+
+
+const f_seq = 225e6;              // sequencer clock frequency
+
+
+
+//
+const pulse_sec =50e-6;
+const pulseramp_sec =500e-9;
+//keep this command at line 17 
+const amplitude11_scaled=-0.46363635821775964;
+//
+//
+//const amplitude_read_scaled=0;
+//const amplitude_read = amplitude11_scaled/0.15
+
+const load11_sec=200e-6*f_s;
+
+const amplitudeRead = amplitude*amplitude11_scaled;
+
+const pulseLoad_sec = pulse_sec;      //seconds
+
+const pulseLoad_width = pulseLoad_sec*f_s;       //# of points 
+
+const pulseInit_sec =500e-6;
+const pulseManip_sec =500e-6;
+const pulseRamp11_sec =pulseramp_sec;     //seconds
+const pulseRamptoRead_sec =pulseramp_sec;     //seconds
+const pulseRead_sec =500e-6;
+
+/////////////////
+const pulseInit_width = pulseInit_sec*f_s;       //# of points 
+const pulseManip_width = pulseManip_sec*f_s;       //# of points 
+const pulseRamp11_width =pulseRamp11_sec*f_s;     //seconds
+const pulseRamptoRead_width =pulseRamptoRead_sec*f_s;     //seconds
+const pulseRead_width =pulseRead_sec*f_s;     //seconds
+////////////////////
+
+
+wave Zero = rect(pulseLoad_width, 0);
+
+wave Load = rect(pulseLoad_width, amplitude);
+
+
+
+wave Init02 = rect(pulseInit_width, amplitude);
+wave Ramp11=ramp(pulseRamp11_width, -amplitude,amplitude);
+wave Manip11 = rect(pulseManip_width, -amplitude);
+wave RampR=ramp(pulseRamptoRead_width, amplitude,amplitudeRead);
+//wave Read=rect(pulseRead_width,amplitudeRead);
+wave Read= placeholder(pulseRead_width);
+wave pulseSIMPLE = join(Load,-Load);
+//wave pulseTOT = join(Init02,Ramp11,Manip11,RampR,Read);
+//wave pulseTOT_inv = join(-Init02,-Ramp11,-Manip11,-RampR,-Read);
+assignWaveIndex(Read, 0);
+
+wave pulseTOT = join(Init02,Manip11,Read);
+wave pulseTOT_inv =join(-Init02,-Manip11,-Read);
+//wave pulseTOT_inv = -Read;
+//wave pulseTOT_inv = join(Load,-Load);
+//wave pulseTOTdouble = join(-Load11,Read,Empty,Load11);
+//wave pulse11= join(Load,-Load);
+//wave pulse02 = join(-Load11,Read,Empty,Load11);
+//wave pulseRead = join(-Load11,Read,Empty,Load11);
+//
+//G3
+//wave aux_ch1 = join(-Load,+Load);
+wave aux_ch1 = join(-pulseTOT,-pulseTOT_inv);
+//wave aux_ch1 = join(pulseTOT,pulseTOT_inv);
+//G4
+
+//wave aux_ch2 = join(+Load,-Load);
+wave aux_ch2 = join(pulseTOT,pulseTOT_inv);
+//G2
+wave aux_ch3 = aux_ch1;
+//wave aux_ch4 = join(Empty,Load);
+
+//G5
+//wave aux_ch4 = join(Empty,Load);
+wave aux_ch4 = aux_ch2;
+
+//
+
+
+//
+//wave counterpulse = -Read;
+//
+//
+while (true) {
+ wait(2);
+ setTrigger(0b0010);  // AWGTrigger2 ON to activate the demodulator and OFF to all other triggers
+ wait(20);// wait a certain time (at least the inverse of the demodulator sample rate) to make the rising edge of AWG Trigger 2 visible in the demodulator data stream
+ //wait(2/datatransfer*samplingrate);
+ setTrigger(0b0110);  // AWGTrigger3 ON to start the acquisition of Data Acquisition tool (keeping AWGTrigger2 ON)
+// playWave(2,pulseTOTdouble);
+ //
+ wait(2);
+ 
+ playAuxWave(Init02,Init02,AWG_RATE_14MHZ);
+ playAuxWave(Manip11,Manip11,AWG_RATE_14MHZ);
+ playAuxWave(Read,Read,AWG_RATE_14MHZ);
+  // playAuxWave(pulseSIMPLE,AWG_RATE_14MHZ);
+ //playWaveNow(2,pulseTOT);
+ //
+ waitWave();
+ setTrigger(0b0000); // Reset AWGTrigger2 and AWGTrigger3 to false/0 
+ //wait(2);
+ wait(20); // 
+}
